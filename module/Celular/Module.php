@@ -9,6 +9,10 @@
 
 namespace Celular;
 
+use Celular\Model\Celular;
+use Celular\Model\CelularTable;
+use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\TableGateway\TableGateway;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\Mvc\MvcEvent;
 
@@ -35,5 +39,24 @@ class Module
                 ),
             ),
         );
+    }
+    
+    public function getServiceConfig()
+    {
+    	return array(
+    			'factories' => array(
+    					'Celular\Model\CelularTable' =>  function($sm) {
+    						$tableGateway = $sm->get('CelularTableGateway');
+    						$table = new CelularTable($tableGateway);
+    						return $table;
+    					},
+    					'CelularTableGateway' => function ($sm) {
+    						$dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+    						$resultSetPrototype = new ResultSet();
+    						$resultSetPrototype->setArrayObjectPrototype(new Celular());
+    						return new TableGateway('tb_celular', $dbAdapter, null, $resultSetPrototype);
+    					},
+    			),
+    	);
     }
 }

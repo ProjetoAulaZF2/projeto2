@@ -8,9 +8,10 @@ Esse segundo projeto contempla os seguintes tópicos:
 
 * Criar uma base de dados e uma tabela para realizar um CRUD.
 * Conexão com uma base de dados, podendo utilizar a TableGatway.
+* Listagem de dados
 * Criar formulários utilizando o Zend\Form\Form 
 * Filtros e validadores
-* Listagem de dados
+
 
 
 Criação da base de dados
@@ -33,24 +34,182 @@ Execute esse comando em seu Mysql para criar o banco e a tabela que iremos utili
 Conexão do ZF2 com a base de dados Mysql
 ------------------------------------------
 
-Para realizar uma conexão com a base de dados mysql edite o arquivo projeto2/config/autoload/local.php e coloque o seguinte código:
+Para realizar uma conexão com a base de dados mysql edite o arquivo projeto2/config/autoload/global.php e coloque o seguinte código:
+	
+	<?php
+	return array(
+	    'db' => array(
+		'driver'         => 'Pdo',
+		'dsn'            => 'mysql:dbname=db_projeto2;host=localhost',
+		'driver_options' => array(
+		    PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''
+		),
+	    ),
+	    'service_manager' => array(
+		'factories' => array(
+		    'Zend\Db\Adapter\Adapter'
+		            => 'Zend\Db\Adapter\AdapterServiceFactory',
+		),
+	    ),
+	);
+
+Modifique o arquivo projeto2/config/autoload/local.php também com os parametros do seu banco local:
 
 	<?php
-
 	return array(
-
 	    'db' => array(
-		            'driver' => 'Pdo',
-		            'dsn' => 'mysql:dbname=db_projeto2;host=localhost',
-		            'username' => 'root',
-		            'password' => 'root',
-		            'driver_options' => array(
-		                            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''
-		            ),
+		'username' => 'root',
+		'password' => 'root',
 	    ),
-	    'display_startup_errors' => true,
-	    'display_errors' => true
 	);
+
+Listabem de registros
+------------------------------------------
+
+Vamos inserir alguns registros em nossa tabela para criar a listagem:
+
+	INSERT INTO `db_projeto2`.`tb_celular` (`marca`, `modelo`, `ativo`) VALUES ('Samsung', 'Galaxy 5', '1');
+	INSERT INTO `db_projeto2`.`tb_celular` (`id`, `marca`, `modelo`, `ativo`) VALUES ('', 'Motorola', 'Moto G', '1');
+	INSERT INTO `db_projeto2`.`tb_celular` (`id`, `marca`, `modelo`, `ativo`) VALUES ('', 'Nokia', 'Lumia', '1');
+
+
+Para criarmos nossa primeira listagem teremos que criar alguns arquivos.
+O primeiro arquivo que iremos criar é o projeto2/module/Celular/src/Celular/Model/Celular.php com o seguinte código:
+
+	<?php
+	namespace Celular\Model;
+
+	class Celular
+	{
+
+	    public $id;
+
+	    public $marca;
+
+	    public $modelo;
+
+	    public $ativo;
+
+
+	    public function exchangeArray($data)
+	    {
+		$this->id = (isset($data['id'])) ? $data['id'] : null;
+		$this->marca = (isset($data['marca'])) ? $data['marca'] : null;
+		$this->modelo = (isset($data['modelo'])) ? $data['modelo'] : null;
+		$this->ativo = (isset($data['ativo'])) ? $data['ativo'] : null;
+	    }
+
+	}
+
+O segundo arquivo necessário é o projeto2/module/Celular/src/Celular/Model/CelularTable.php com o seguinte código:
+
+	<?php
+	namespace Celular\Model;
+
+	use Zend\Db\Sql\Select;
+	use Zend\Db\TableGateway\TableGateway;
+	use Zend\Db\Adapter\Adapter;
+	use Zend\Db\ResultSet\ResultSet;
+
+	class CelularTable
+	{
+
+	    protected $tableGateway;
+
+	    const ATIVO = 1;
+
+	    public function __construct(TableGateway $tableGateway)
+	    {
+		$this->tableGateway = $tableGateway;
+	    }
+
+	    public function fetchAll()
+	    {
+		$resultSet = $this->tableGateway->select();
+		return $resultSet;
+	    }
+
+	    public function getCelular($id)
+	    {
+		$id = (int) $id;
+		$rowset = $this->tableGateway->select(array(
+		    'id' => $id
+		));
+		$row = $rowset->current();
+		if (! $row) {
+		    throw new \Exception("Não existe linha no banco para este id $id");
+		}
+		return $row;
+	    }
+	}
+
+Também é necessário configurar o arquivo projeto2/module/Celular/Module.php inserindo o seguinte método:
+
+	//Coloque essas namespaces
+	use Celular\Model\Celular;
+	use Celular\Model\CelularTable;
+	use Zend\Db\ResultSet\ResultSet;
+	use Zend\Db\TableGateway\TableGateway;
+
+	// Coloque esse método
+	 public function getServiceConfig()
+	    {
+	    	return array(
+	    			'factories' => array(
+	    					'Celular\Model\CelularTable' =>  function($sm) {
+	    						$tableGateway = $sm->get('CelularTableGateway');
+	    						$table = new CelularTable($tableGateway);
+	    						return $table;
+	    					},
+	    					'CelularTableGateway' => function ($sm) {
+	    						$dbAdapter = $sm->get('Zend\Db\Adapter\Adapter');
+	    						$resultSetPrototype = new ResultSet();
+	    						$resultSetPrototype->setArrayObjectPrototype(new Celular());
+	    						return new TableGateway('tb_celular', $dbAdapter, null, $resultSetPrototype);
+	    					},
+	    			),
+	    	);
+	    }
+
+
+Sua controller vai ficar assim:
+
+	<?php
+	namespace Celular\Controller;
+
+	use Zend\Mvc\Controller\AbstractActionController;
+	use Zend\View\Model\ViewModel;
+
+	class IndexController extends AbstractActionController
+	{
+	    protected $celularTable;
+	    
+	    public function indexAction()
+	    {
+		return new ViewModel(array(
+		    'celulares' => $this->getCelularTable()->fetchAll(),
+		));
+	    }
+	    //Crie esse método
+	    public function getCelularTable()
+	    {
+	    	if (!$this->celularTable) {
+	    		$sm = $this->getServiceLocator();
+	    		$this->celularTable = $sm->get('Celular\Model\CelularTable');
+	    	}
+	    	return $this->celularTable;
+	    }
+	}
+
+
+
+
+
+
+
+
+
+
 
 
 
