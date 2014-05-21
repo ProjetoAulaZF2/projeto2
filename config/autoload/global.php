@@ -16,7 +16,7 @@ return array(
 
         'db' => array(
                         'driver' => 'Pdo',
-                        'dsn' => 'mysql:dbname=db_projeto1;hostname=localhost',
+                        'dsn' => 'mysql:dbname=db_projeto2;hostname=localhost',
                         'username' => 'root',
                         'password' => 'root',
                         'driver_options' => array(
