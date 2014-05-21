@@ -30,7 +30,7 @@ Execute esse comando em seu Mysql para criar o banco e a tabela que iremos utili
 	DEFAULT CHARACTER SET = utf8
 	COLLATE = utf8_general_ci;
 
-Conexão do ZF2 com a base de dados Mysql:
+Conexão do ZF2 com a base de dados Mysql
 ------------------------------------------
 
 Para realizar uma conexão com a base de dados mysql edite o arquivo projeto2/config/autoload/local.php e coloque o seguinte código:
