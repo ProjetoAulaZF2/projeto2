@@ -9,8 +9,6 @@ Esse segundo projeto contempla os seguintes tópicos:
 * Criar uma base de dados e uma tabela para realizar um CRUD.
 * Conexão com uma base de dados, podendo utilizar a TableGatway.
 * Listagem de dados
-* Criar formulários utilizando o Zend\Form\Form 
-* Filtros e validadores
 
 
 
@@ -202,7 +200,10 @@ Sua controller vai ficar assim:
 	}
 
 
-
+Pronto! Assim conseguiremos conectar com nossa base e criar uma simples listagem no Zend Framework 2.
+É muito simples fazer isso, e o melhor é que desenvolvemos isso tudo totalmente com OO.
+Se você preferir pode baixar o projeto 2 que está contido todas essas alterações que fizemos.
+Agora iremos para o projeto 3 e dar continuidade as nossas aulas.
 
 
 
