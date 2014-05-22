@@ -63,7 +63,7 @@ Modifique o arquivo projeto2/config/autoload/local.php também com os parametros
 	    ),
 	);
 
-Listabem de registros
+Listagem de registros
 ------------------------------------------
 
 Vamos inserir alguns registros em nossa tabela para criar a listagem:
