@@ -16,7 +16,7 @@ Criação da base de dados
 --------------------------
 
 Execute esse comando em seu Mysql para criar o banco e a tabela que iremos utilizar:
-
+~~~sql
 	CREATE SCHEMA IF NOT EXISTS `db_projeto2` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;
 
 	CREATE TABLE IF NOT EXISTS `db_projeto2`.`tb_celular` (
@@ -28,12 +28,12 @@ Execute esse comando em seu Mysql para criar o banco e a tabela que iremos utili
 	ENGINE = InnoDB
 	DEFAULT CHARACTER SET = utf8
 	COLLATE = utf8_general_ci;
-
+~~~
 Conexão do ZF2 com a base de dados Mysql
 ------------------------------------------
 
 Para realizar uma conexão com a base de dados mysql edite o arquivo projeto2/config/autoload/global.php e coloque o seguinte código:
-	
+~~~php	
 	<?php
 	return array(
 	    'db' => array(
@@ -50,9 +50,9 @@ Para realizar uma conexão com a base de dados mysql edite o arquivo projeto2/co
 		),
 	    ),
 	);
-
+~~~
 Modifique o arquivo projeto2/config/autoload/local.php também com os parametros do seu banco local:
-
+~~~php
 	<?php
 	return array(
 	    'db' => array(
@@ -60,20 +60,20 @@ Modifique o arquivo projeto2/config/autoload/local.php também com os parametros
 		'password' => 'root',
 	    ),
 	);
-
+~~~
 Listagem de registros
 ------------------------------------------
 
 Vamos inserir alguns registros em nossa tabela para criar a listagem:
-
+~~~sql
 	INSERT INTO `db_projeto2`.`tb_celular` (`marca`, `modelo`, `ativo`) VALUES ('Samsung', 'Galaxy 5', '1');
 	INSERT INTO `db_projeto2`.`tb_celular` (`id`, `marca`, `modelo`, `ativo`) VALUES ('', 'Motorola', 'Moto G', '1');
 	INSERT INTO `db_projeto2`.`tb_celular` (`id`, `marca`, `modelo`, `ativo`) VALUES ('', 'Nokia', 'Lumia', '1');
-
+~~~
 
 Para criarmos nossa primeira listagem teremos que criar alguns arquivos.
 O primeiro arquivo que iremos criar é o projeto2/module/Celular/src/Celular/Model/Celular.php com o seguinte código:
-
+~~~php
 	<?php
 	namespace Celular\Model;
 
@@ -98,9 +98,9 @@ O primeiro arquivo que iremos criar é o projeto2/module/Celular/src/Celular/Mod
 	    }
 
 	}
-
+~~~
 O segundo arquivo necessário é o projeto2/module/Celular/src/Celular/Model/CelularTable.php com o seguinte código:
-
+~~~php
 	<?php
 	namespace Celular\Model;
 
@@ -140,9 +140,9 @@ O segundo arquivo necessário é o projeto2/module/Celular/src/Celular/Model/Cel
 		return $row;
 	    }
 	}
-
+~~~
 Também é necessário configurar o arquivo projeto2/module/Celular/Module.php inserindo o seguinte método:
-
+~~~php
 	//Coloque essas namespaces
 	use Celular\Model\Celular;
 	use Celular\Model\CelularTable;
@@ -168,10 +168,10 @@ Também é necessário configurar o arquivo projeto2/module/Celular/Module.php i
 	    			),
 	    	);
 	    }
-
+~~~
 
 Sua controller vai ficar assim:
-
+~~~php
 	<?php
 	namespace Celular\Controller;
 
@@ -198,7 +198,7 @@ Sua controller vai ficar assim:
 	    	return $this->celularTable;
 	    }
 	}
-
+~~~
 
 Pronto! Assim conseguiremos conectar com nossa base e criar uma simples listagem no Zend Framework 2.
 É muito simples fazer isso, e o melhor é que desenvolvemos isso tudo totalmente com OO.
